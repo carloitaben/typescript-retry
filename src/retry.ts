@@ -13,9 +13,9 @@ export type RetryUntilCallback<Result = unknown> = (
 ) => boolean | Promise<boolean>
 
 type RetryOptions<Result = unknown> = {
-  until?: RetryUntilCallback<Result>
-  times?: number
   delay?: number | RetryDelayCallback<Result>
+  times?: number
+  until?: RetryUntilCallback<Result>
 }
 
 export type LinearDelayOptions = {
@@ -27,6 +27,20 @@ export function linearDelay(options?: LinearDelayOptions): RetryDelayCallback {
   const from = options?.from ?? 0
   const step = options?.step ?? 100
   return (context) => from + context.attempt * step
+}
+
+export type ExponentialDelayOptions = {
+  from?: number
+  step?: number
+}
+
+export function exponentialDelay(
+  options?: ExponentialDelayOptions
+): RetryDelayCallback {
+  const from = options?.from ?? 100
+  const step = options?.step ?? 2
+  return (context) =>
+    context.attempt > 1 ? step ** context.attempt * from : from
 }
 
 export function jitter(amount: number): RetryDelayCallback
@@ -44,6 +58,7 @@ export function jitter<Result>(
 
 const genericOptions = {
   times: 3,
+  delay: 500,
 } satisfies RetryOptions
 
 function some<Value>(value: Value): value is NonNullable<Value> {
