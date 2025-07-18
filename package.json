@@ -1,0 +1,36 @@
+{
+  "name": "typescript-retry",
+  "type": "module",
+  "version": "0.1.0",
+  "author": {
+    "name": "Carlo Domínguez",
+    "email": "hello@carlo.works",
+    "url": "https://carlo.works"
+  },
+  "license": "MIT",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "test": "vitest",
+    "build": "tsdown"
+  },
+  "packageManager": "pnpm@9.14.2",
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "tsdown": "^0.12.9",
+    "typescript": "5.9.0-beta",
+    "vitest": "^3.2.4"
+  }
+}
