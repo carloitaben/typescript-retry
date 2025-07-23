@@ -83,10 +83,8 @@ describe(fibonacciDelay.name, () => {
     const expectedValues = [1, 2, 3, 5, 8, 13, 21, 34, 55].map(
       (el) => el * scale,
     )
-    let debug = []
     for (let i = 0; i < expectedValues.length; i++) {
       const value = delay(context)
-      debug.push(value)
       expect(value).toBe(expectedValues[i])
     }
   })
