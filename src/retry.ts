@@ -30,13 +30,11 @@ export type ExponentialDelayOptions = {
   scale?: number
 }
 
-function getFibonacciscale(start: number) {
-  if (start === 0) return { previous: 0, current: 1 }
-  if (start === 1) return { current: 1, previous: 1 }
+function getFibonacciStep(start: number) {
   let current = 1,
-    previous = 1
-  for (let i = 2; i < start; i++) {
-    ;[previous, current] = [previous, current + previous]
+    previous = 0
+  for (let i = 0; i < start; i++) {
+    ;[previous, current] = [current, current + previous]
   }
   return { current, previous }
 }
@@ -51,7 +49,7 @@ export function fibonacciDelay(
 ): RetryDelayCallback {
   const start = options?.start ?? 0
   const scale = options?.scale ?? 1_000
-  const { current, previous } = getFibonacciscale(start)
+  const { current, previous } = getFibonacciStep(start)
   let currentPrev = previous
   let currentNext = current
 

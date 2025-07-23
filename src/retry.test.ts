@@ -61,12 +61,29 @@ describe(fibonacciDelay.name, () => {
       expect(value).toBe(expectedValues[i])
     }
   })
-  test("starting from custom value", () => {
+
+  test("start", () => {
     const context = { attempt: 0 }
     const start = 3
+    const scale = 1_000
     const delay = fibonacciDelay({ start })
-    const expectedValues = [1, 2, 3, 5, 8, 13, 21, 34, 55]
-    for (let i = start - 1; i < expectedValues.length; i++) {
+    const expectedValues = [1, 2, 3, 5, 8, 13, 21, 34, 55].map(
+      (el) => el * scale,
+    )
+    for (let i = start; i < expectedValues.length; i++) {
+      const value = delay(context)
+      expect(value).toBe(expectedValues[i])
+    }
+  })
+
+  test("scale", () => {
+    const context = { attempt: 0 }
+    const scale = 1_000 * 60
+    const delay = fibonacciDelay({ scale })
+    const expectedValues = [1, 2, 3, 5, 8, 13, 21, 34, 55].map(
+      (el) => el * scale,
+    )
+    for (let i = 0; i < expectedValues.length; i++) {
       const value = delay(context)
       expect(value).toBe(expectedValues[i])
     }
