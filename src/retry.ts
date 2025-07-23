@@ -34,7 +34,9 @@ function getFibonacciStep(start: number) {
   let current = 1,
     previous = 0
   for (let i = 0; i < start; i++) {
-    ;[previous, current] = [current, current + previous]
+    const next = previous + current
+    previous = current
+    current = next
   }
   return { current, previous }
 }
@@ -54,7 +56,9 @@ export function fibonacciDelay(
   let currentNext = current
 
   return () => {
-    ;[currentPrev, currentNext] = [currentNext, currentPrev + currentNext]
+    const next = currentPrev + currentNext
+    currentPrev = currentNext
+    currentNext = next
     return currentNext * scale
   }
 }
