@@ -15,25 +15,58 @@ type RetryOptions<Result = unknown> = {
 }
 
 export type LinearDelayOptions = {
-	from?: number
-	step?: number
+  from?: number
+  scale?: number
 }
 
 export function linearDelay(options?: LinearDelayOptions): RetryDelayCallback {
 	const from = options?.from ?? 0
-	const step = options?.step ?? 100
-	return (context) => from + context.attempt * step
+	const scale = options?.scale ?? 100
+  return (context) => from + context.attempt * scale
 }
 
 export type ExponentialDelayOptions = {
-	from?: number
-	step?: number
+  from?: number
+  scale?: number
 }
+
+function getFibonacciscale(start: number) {
+  if (start === 0) return { previous: 0, current: 1 }
+  if (start === 1) return { current: 1, previous: 1 }
+  let current = 1,
+    previous = 1
+  for (let i = 2; i < start; i++) {
+    ;[previous, current] = [previous, current + previous]
+  }
+  return { current, previous }
+}
+
+type FibonacciDelayOptions = {
+  start?: number
+  scale?: number
+}
+
+export function fibonacciDelay(
+  options?: FibonacciDelayOptions,
+): RetryDelayCallback {
+  const start = options?.start ?? 0
+  const scale = options?.scale ?? 1_000
+  const { current, previous } = getFibonacciscale(start)
+  let currentPrev = previous
+  let currentNext = current
+
+  return () => {
+    ;[currentPrev, currentNext] = [currentNext, currentPrev + currentNext]
+    return currentNext * scale
+  }
+}
+
 
 export function exponentialDelay(options?: ExponentialDelayOptions): RetryDelayCallback {
 	const from = options?.from ?? 100
-	const step = options?.step ?? 2
-	return (context) => (context.attempt > 1 ? step ** context.attempt * from : from)
+	const scale = options?.scale ?? 2
+  return (context) =>
+    context.attempt > 1 ? scale ** context.attempt * from : from
 }
 
 export function jitter(amount: number): RetryDelayCallback
