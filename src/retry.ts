@@ -61,7 +61,6 @@ export function fibonacciDelay(
   }
 }
 
-
 export function exponentialDelay(options?: ExponentialDelayOptions): RetryDelayCallback {
 	const from = options?.from ?? 100
 	const scale = options?.scale ?? 2
