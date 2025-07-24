@@ -12,7 +12,10 @@ export type RetryUntilCallback<Result = unknown> = (
   result: Result,
 ) => boolean | Promise<boolean>
 
-type RetryOptions<Result = unknown> = {
+/**
+ * TODO: document
+ */
+export type RetryOptions<Result = unknown> = {
   delay?: number | RetryDelayCallback<Result>
   times?: number
   until?: RetryUntilCallback<Result>
@@ -23,15 +26,13 @@ export type LinearDelayOptions = {
   scale?: number
 }
 
+/**
+ * TODO: document
+ */
 export function linearDelay(options?: LinearDelayOptions): RetryDelayCallback {
   const from = options?.from ?? 0
   const scale = options?.scale ?? 100
   return (context) => from + context.attempt * scale
-}
-
-export type ExponentialDelayOptions = {
-  from?: number
-  scale?: number
 }
 
 function getFibonacciStep(start: number) {
@@ -45,11 +46,14 @@ function getFibonacciStep(start: number) {
   return step
 }
 
-type FibonacciDelayOptions = {
+export type FibonacciDelayOptions = {
   start?: number
   scale?: number
 }
 
+/**
+ * TODO: document
+ */
 export function fibonacciDelay(
   options?: FibonacciDelayOptions,
 ): RetryDelayCallback {
@@ -65,6 +69,14 @@ export function fibonacciDelay(
   }
 }
 
+export type ExponentialDelayOptions = {
+  from?: number
+  scale?: number
+}
+
+/**
+ * TODO: document
+ */
 export function exponentialDelay(
   options?: ExponentialDelayOptions,
 ): RetryDelayCallback {
@@ -74,8 +86,16 @@ export function exponentialDelay(
     context.attempt > 1 ? scale ** context.attempt * from : from
 }
 
+/**
+ * TODO: document
+ */
 export function jitter(amount: number): RetryDelayCallback
+
+/**
+ * TODO: document
+ */
 export function jitter(delay: RetryDelayCallback): RetryDelayCallback
+
 export function jitter<Result>(
   amountOrDelay: number | RetryDelayCallback,
 ): RetryDelayCallback<Result> {
@@ -98,10 +118,16 @@ function some<Value>(value: Value): value is NonNullable<Value> {
   return value !== undefined && value !== null
 }
 
+/**
+ * TODO: document
+ */
 export async function sleep(timeout: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, timeout))
 }
 
+/**
+ * TODO: document
+ */
 export class UntilMismatchError extends Error {
   public override name = "UntilMismatchError"
   constructor(options?: ErrorOptions) {
@@ -109,12 +135,18 @@ export class UntilMismatchError extends Error {
   }
 }
 
+/**
+ * TODO: document
+ */
 export function isUntilMismatchError(
   error: unknown,
 ): error is UntilMismatchError {
   return error instanceof UntilMismatchError
 }
 
+/**
+ * TODO: document
+ */
 export class TooManyRetriesError extends Error {
   public override name = "UntilMismatchError"
   constructor(options?: ErrorOptions) {
@@ -122,6 +154,9 @@ export class TooManyRetriesError extends Error {
   }
 }
 
+/**
+ * TODO: document
+ */
 export function isTooManyRetriesError(
   error: unknown,
 ): error is TooManyRetriesError {
@@ -168,6 +203,9 @@ async function run<Result>(
   }
 }
 
+/**
+ * TODO: document
+ */
 export function createRetry<DefaultResult = unknown>(
   defaultOptions?: RetryOptions<DefaultResult>,
 ) {
