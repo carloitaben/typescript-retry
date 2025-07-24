@@ -23,8 +23,9 @@
     }
   },
   "scripts": {
-    "test": "vitest",
-    "build": "tsdown"
+    "build": "tsdown",
+    "check": "tsc --noEmit",
+    "test": "vitest"
   },
   "packageManager": "pnpm@9.14.2",
   "devDependencies": {
