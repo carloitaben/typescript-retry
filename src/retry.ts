@@ -12,12 +12,87 @@ export type RetryUntilCallback<Result = unknown> = (
   result: Result,
 ) => boolean | Promise<boolean>
 
-/**
- * TODO: document
- */
 export type RetryOptions<Result = unknown> = {
+  /**
+   * Either the time in milliseconds between retries, or a function that will be
+   * invoked to calculate the delay.
+   *
+   * @example
+   * Retry with a fixed delay
+   *
+   * ```ts
+   * const retry = createRetry({
+   *   delay: 500
+   * })
+   * ```
+   *
+   * @example
+   * Retry immediately
+   *
+   * ```ts
+   * const retry = createRetry({
+   *   delay: 0
+   * })
+   * ```
+   *
+   * @example
+   * Dynamically calculating delay
+
+   * ```ts
+   * const retry = createRetry({
+   *   delay: (context) => context.attempt * 100
+   * })
+   * ```
+   * 
+   * @example
+   * Clamping the delay
+   * 
+   * ```ts
+   * const retry = createRetry({
+   *   delay: (context) => Math.max(context.attempt * 100, 10000)
+   * })
+   * ```
+   */
   delay?: number | RetryDelayCallback<Result>
+  /**
+   * The maximum number of retries the function will attempt.
+   *
+   * @example
+   * Retry a maximum of 10 times
+   *
+   * ```ts
+   * const retry = createRetry({
+   *   times: 10
+   * })
+   * ```
+   *
+   * @example
+   * Retry until no error is thrown
+   *
+   * ```ts
+   * const retry = createRetry({
+   *   times: Infinity
+   * })
+   * ```
+   *
+   * @default 3
+   */
   times?: number
+  /**
+   * Validates the function result. Returns a `boolean` indicating whether the
+   * result is expected.
+   *
+   * @example
+   * Retry until valid response
+   *
+   * ```ts
+   * export const retryUntilValidResponse = createRetry<Response>(
+   *   times: Infinity,
+   *   until: (response) => response.ok,
+   *   //      ^? Response
+   * })
+   * ```
+   */
   until?: RetryUntilCallback<Result>
 }
 
@@ -27,12 +102,52 @@ export type LinearDelayOptions = {
 }
 
 /**
- * TODO: document
+ * Generates a linear delay.
+ * By default, it uses the following options:
+ *
+ * ```ts
+ * linearDelay({
+ *   from: 0,
+ *   scale: 100
+ * })
+ * ```
+ *
+ * @example
+ *
+ * ```ts
+ * const retry = createRetry({
+ *   delay: linearDelay()
+ * })
+ * ```
+ *
+ *
+ * @example
+ * From
+ *
+ * ```ts
+ * const retry = createRetry({
+ *   delay: linearDelay({ from: 500 })
+ * })
+ * ```
+ *
+ * @example
+ * Scale
+ *
+ * ```ts
+ * const retry = createRetry({
+ *   delay: linearDelay({ scale: 1000 })
+ * })
+ * ```
  */
 export function linearDelay(options?: LinearDelayOptions): RetryDelayCallback {
   const from = options?.from ?? 0
   const scale = options?.scale ?? 100
   return (context) => from + context.attempt * scale
+}
+
+export type FibonacciDelayOptions = {
+  start?: number
+  scale?: number
 }
 
 function getFibonacciStep(start: number) {
@@ -46,13 +161,43 @@ function getFibonacciStep(start: number) {
   return step
 }
 
-export type FibonacciDelayOptions = {
-  start?: number
-  scale?: number
-}
-
 /**
- * TODO: document
+ * Generates a delay based on the Fibonacci sequence.
+ * By default, it uses the following options:
+ *
+ * ```ts
+ * fibonacciDelay({
+ *   from: 100,
+ *   scale: 2
+ * })
+ * ```
+ *
+ * @example
+ *
+ * ```ts
+ * const retry = createRetry({
+ *   delay: fibonacciDelay()
+ * })
+ * ```
+ *
+ *
+ * @example
+ * From
+ *
+ * ```ts
+ * const retry = createRetry({
+ *   delay: fibonacciDelay({ from: 500 })
+ * })
+ * ```
+ *
+ * @example
+ * Scale
+ *
+ * ```ts
+ * const retry = createRetry({
+ *   delay: fibonacciDelay({ scale: 10 })
+ * })
+ * ```
  */
 export function fibonacciDelay(
   options?: FibonacciDelayOptions,
@@ -75,7 +220,41 @@ export type ExponentialDelayOptions = {
 }
 
 /**
- * TODO: document
+ * Generates an exponential delay.
+ * By default, it uses the following options:
+ *
+ * ```ts
+ * exponentialDelay({
+ *   from: 100,
+ *   scale: 2
+ * })
+ * ```
+ *
+ * @example
+ *
+ * ```ts
+ * const retry = createRetry({
+ *   delay: exponentialDelay()
+ * })
+ * ```
+ *
+ * @example
+ * From
+ *
+ * ```ts
+ * const retry = createRetry({
+ *   delay: exponentialDelay({ from: 500 })
+ * })
+ * ```
+ *
+ * @example
+ * Scale
+ *
+ * ```ts
+ * const retry = createRetry({
+ *   delay: exponentialDelay({ scale: 10 })
+ * })
+ * ```
  */
 export function exponentialDelay(
   options?: ExponentialDelayOptions,
@@ -119,7 +298,14 @@ function some<Value>(value: Value): value is NonNullable<Value> {
 }
 
 /**
- * TODO: document
+ * Waits for a given number of milliseconds.
+ * Used internally by the delay functions.
+ *
+ * @example
+ *
+ * ```ts
+ * await sleep(3000)
+ * ```
  */
 export async function sleep(timeout: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, timeout))
@@ -204,7 +390,21 @@ async function run<Result>(
 }
 
 /**
- * TODO: document
+ * Creates a retry function with the provided options as default.
+ * By default, it uses the following options:
+ *
+ * ```ts
+ * createRetry({
+ *   times: 3,
+ *   delay: 500,
+ * })
+ * ```
+ *
+ * @example
+ *
+ * ```ts
+ * const retry = createRetry()
+ * ```
  */
 export function createRetry<DefaultResult = unknown>(
   defaultOptions?: RetryOptions<DefaultResult>,
