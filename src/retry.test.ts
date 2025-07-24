@@ -4,7 +4,7 @@ import {
   fibonacciDelay,
   jitter,
   linearDelay,
-} from "./retry.js"
+} from "./retry"
 import { afterEach, beforeEach, describe, expect, test } from "vitest"
 
 test(createRetry.name, () => {
