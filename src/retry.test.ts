@@ -1,4 +1,10 @@
-import { createRetry, exponentialDelay, jitter, linearDelay } from "./retry.js"
+import {
+  createRetry,
+  exponentialDelay,
+  fibonacciDelay,
+  jitter,
+  linearDelay,
+} from "./retry"
 import { afterEach, beforeEach, describe, expect, test } from "vitest"
 
 test(createRetry.name, () => {
@@ -24,8 +30,8 @@ describe(linearDelay.name, () => {
     expect([delay({ attempt: 1 }), delay({ attempt: 2 })]).toEqual([300, 400])
   })
 
-  test("step", () => {
-    const delay = linearDelay({ step: 200 })
+  test("scale", () => {
+    const delay = linearDelay({ scale: 200 })
     expect([delay({ attempt: 1 }), delay({ attempt: 2 })]).toEqual([200, 400])
   })
 })
@@ -42,6 +48,48 @@ describe(exponentialDelay.name, () => {
     ]).toEqual([100, 400, 800, 1600, 3200])
   })
 })
+
+describe(fibonacciDelay.name, () => {
+  test("default", () => {
+    const context = { attempt: 0 }
+    const delay = fibonacciDelay()
+    const expectedValues = [1, 2, 3, 5, 8, 13, 21, 34, 55].map(
+      (el) => el * 1_000,
+    )
+    for (let i = 0; i < expectedValues.length; i++) {
+      const value = delay(context)
+      expect(value).toBe(expectedValues[i])
+    }
+  })
+
+  test("start", () => {
+    const context = { attempt: 0 }
+    const start = 3
+    const scale = 1_000
+    const delay = fibonacciDelay({ start })
+    const expectedValues = [1, 2, 3, 5, 8, 13, 21, 34, 55].map(
+      (el) => el * scale,
+    )
+    for (let i = start; i < expectedValues.length; i++) {
+      const value = delay(context)
+      expect(value).toBe(expectedValues[i])
+    }
+  })
+
+  test("scale", () => {
+    const context = { attempt: 0 }
+    const scale = 1_000 * 60
+    const delay = fibonacciDelay({ scale })
+    const expectedValues = [1, 2, 3, 5, 8, 13, 21, 34, 55].map(
+      (el) => el * scale,
+    )
+    for (let i = 0; i < expectedValues.length; i++) {
+      const value = delay(context)
+      expect(value).toBe(expectedValues[i])
+    }
+  })
+})
+
 describe(jitter.name, () => {
   let originalMathRandom: typeof Math.random
   beforeEach(() => {
